@@ -1,26 +1,19 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
-	"text/template"
 )
 
-var ProgramInfo struct {
-	PlatForm  string
-	Version   string
-	GoVersion string
-	Author    string
-	BuildTime string
-}
 var (
-	version         bool
-	versionTemplate = `version:fopt-{{.Version}}-{{.PlatForm}}
-go version:{{.GoVersion}}
-author:{{.Author}}
-build time :{{.BuildTime}}
-`
+	version bool
+)
+
+var (
+	Version = `fopt-0.1.1-Alpha`
+	Author  = `BuTn<http://github.com/kimmosc2>`
 )
 
 var rootCmd = &cobra.Command{
@@ -30,18 +23,16 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if version {
 			setVersion()
+			os.Exit(0)
 		}
+		cmd.Usage()
+		os.Exit(0)
 	},
 }
 
 func setVersion() {
-	vt := template.New("versionTpl")
-	parse, err := vt.Parse(versionTemplate)
-	if err != nil {
-		panic(err)
-	}
-	err = parse.Execute(os.Stdout, ProgramInfo)
-	panic(err)
+	fmt.Printf("version:%s\n"+
+		"author:%s\n", Version, Author)
 }
 
 func Execute() {

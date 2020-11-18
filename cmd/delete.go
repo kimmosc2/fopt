@@ -3,7 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/kimmosc2/file-operator/internal"
+	"github.com/kimmosc2/fopt/internal"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -32,13 +32,22 @@ var deleteCmd = &cobra.Command{
 			cmd.Usage()
 			os.Exit(1)
 		}
-
-		compile, err := regexp.Compile(reg)
-		if err != nil {
-			log.Fatalf("compile regular expression error:%s", err)
+		if suffix != "" {
+			err := internal.SuffixWalk(fileDir, suffix, unsafeMode)
+			if err != nil {
+				log.Fatalf("SuffixWalk error: %s", err)
+			}
+			return
 		}
-		if err := internal.Walk(fileDir, compile, unsafeMode); err != nil {
-			log.Fatalf("Walk error: %s", err)
+		if reg != "" {
+			compile, err := regexp.Compile(reg)
+			if err != nil {
+				log.Fatalf("compile regular expression error:%s", err)
+			}
+			if err := internal.RegWalk(fileDir, compile, unsafeMode); err != nil {
+				log.Fatalf("RegWalk error: %s", err)
+			}
+			return
 		}
 	},
 }
@@ -46,13 +55,13 @@ var deleteCmd = &cobra.Command{
 // checkDeleteParameter check deleteCmd parameter,
 // if there is an error,it will be return an custom error
 func checkDeleteParameter() error {
-	if reg == "" {
-		return errors.New("empty expression")
+	if reg == "" && suffix == "" {
+		return errors.New("empty expression and suffix")
 	}
 	if fileDir == "" {
 		return errors.New("no specified directory name")
 	}
-	if stat, _ := os.Stat(fileDir); !stat.IsDir() {
+	if stat, err := os.Stat(fileDir); err != nil || !stat.IsDir() {
 		return errors.New(fileDir + " is not a directory")
 	}
 	return nil
@@ -64,7 +73,7 @@ func init() {
 	// file directory
 	deleteCmd.Flags().StringVarP(&fileDir, "dir", "d", "", "target directory")
 	// file suffix
-	// deleteCmd.Flags().StringVarP(&suffix, "suffix", "s", "", "file suffix,suffix and regexp cannot be set at the same time")
+	deleteCmd.Flags().StringVarP(&suffix, "suffix", "s", "", "file suffix,suffix and regexp cannot be set at the same time")
 	// unsafe mode
 	deleteCmd.Flags().BoolVarP(&unsafeMode, "unsafe", "u", false, "unsafe mode, if use this flag, the delete operation will be performed")
 }

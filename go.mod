@@ -1,4 +1,4 @@
-module github.com/kimmosc2/file-operator
+module github.com/kimmosc2/fopt
 
 go 1.15
 

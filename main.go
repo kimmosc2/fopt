@@ -1,11 +1,9 @@
 package main
 
 import (
-	"github.com/kimmosc2/file-operator/cmd"
+	"github.com/kimmosc2/fopt/cmd"
 )
 
 func main() {
 	cmd.Execute()
 }
-
-
